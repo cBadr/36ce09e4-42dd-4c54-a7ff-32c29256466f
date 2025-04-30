@@ -1,12 +1,67 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
-import { MailIcon, LockIcon, UserIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MailIcon, LockIcon, UserIcon, BuildingIcon, PhoneIcon } from 'lucide-react';
+import { signUp } from '@/integrations/supabase/helper';
+import { toast } from 'sonner';
 
 const Register = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    companyName: '',
+    password: '',
+    passwordConfirm: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!acceptTerms) {
+      toast.error('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية');
+      return;
+    }
+    
+    if (formData.password !== formData.passwordConfirm) {
+      toast.error('كلمات المرور غير متطابقة');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const userData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        companyName: formData.companyName,
+        phone: formData.phone
+      };
+      
+      const result = await signUp(formData.email, formData.password, userData);
+      
+      if (result) {
+        // تم إنشاء الحساب بنجاح، انتقل إلى تسجيل الدخول
+        toast.success('تم إنشاء حسابك بنجاح، يرجى تأكيد بريدك الإلكتروني');
+        navigate('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
@@ -20,24 +75,92 @@ const Register = () => {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
+                  الاسم الأول
+                </Label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <UserIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </div>
+                  <Input
+                    id="first-name"
+                    name="firstName"
+                    type="text"
+                    autoComplete="given-name"
+                    required
+                    className="pr-10 placeholder-gray-400"
+                    placeholder="الاسم الأول"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="last-name" className="block text-sm font-medium text-gray-700">
+                  الاسم الأخير
+                </Label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <UserIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </div>
+                  <Input
+                    id="last-name"
+                    name="lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    required
+                    className="pr-10 placeholder-gray-400"
+                    placeholder="الاسم الأخير"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+            
             <div>
-              <Label htmlFor="full-name" className="block text-sm font-medium text-gray-700">
-                الاسم بالكامل
+              <Label htmlFor="company-name" className="block text-sm font-medium text-gray-700">
+                اسم الشركة
               </Label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <BuildingIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <Input
-                  id="full-name"
-                  name="fullName"
+                  id="company-name"
+                  name="companyName"
                   type="text"
-                  autoComplete="name"
-                  required
-                  className="pr-10 placeholder-gray-400 focus:ring-ocean-500 focus:border-ocean-500"
-                  placeholder="أدخل اسمك بالكامل"
+                  autoComplete="organization"
+                  className="pr-10 placeholder-gray-400"
+                  placeholder="اختياري"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                رقم الهاتف
+              </Label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <PhoneIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  className="pr-10 placeholder-gray-400"
+                  placeholder="+966 5x xxx xxxx"
+                  value={formData.phone}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -56,8 +179,10 @@ const Register = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="pr-10 placeholder-gray-400 focus:ring-ocean-500 focus:border-ocean-500"
+                  className="pr-10 placeholder-gray-400"
                   placeholder="your.email@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -76,8 +201,10 @@ const Register = () => {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="pr-10 placeholder-gray-400 focus:ring-ocean-500 focus:border-ocean-500"
+                  className="pr-10 placeholder-gray-400"
                   placeholder="********"
+                  value={formData.password}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -96,8 +223,10 @@ const Register = () => {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="pr-10 placeholder-gray-400 focus:ring-ocean-500 focus:border-ocean-500"
+                  className="pr-10 placeholder-gray-400"
                   placeholder="********"
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -110,6 +239,8 @@ const Register = () => {
                 name="terms"
                 type="checkbox"
                 className="focus:ring-ocean-500 h-4 w-4 text-ocean-500 border-gray-300 rounded"
+                checked={acceptTerms}
+                onChange={() => setAcceptTerms(!acceptTerms)}
                 required
               />
             </div>
@@ -121,8 +252,12 @@ const Register = () => {
           </div>
 
           <div>
-            <Button type="submit" className="w-full bg-brand-800 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
-              إنشاء حساب
+            <Button 
+              type="submit" 
+              className="w-full bg-brand-800 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+              disabled={loading}
+            >
+              {loading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
             </Button>
           </div>
         </form>
