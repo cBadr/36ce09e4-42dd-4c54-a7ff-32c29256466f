@@ -9,144 +9,16 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      client_subscriptions: {
-        Row: {
-          client_id: string
-          created_at: string
-          end_date: string
-          id: string
-          is_active: boolean
-          plan_id: string
-          start_date: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          end_date: string
-          id?: string
-          is_active?: boolean
-          plan_id: string
-          start_date?: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          end_date?: string
-          id?: string
-          is_active?: boolean
-          plan_id?: string
-          start_date?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          company_name: string | null
-          created_at: string
-          full_name: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          company_name?: string | null
-          created_at?: string
-          full_name: string
-          id: string
-          updated_at?: string
-        }
-        Update: {
-          company_name?: string | null
-          created_at?: string
-          full_name?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      subscription_plans: {
-        Row: {
-          created_at: string
-          description: string | null
-          features: Json | null
-          id: string
-          max_concurrent_calls: number
-          name: string
-          price: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          features?: Json | null
-          id?: string
-          max_concurrent_calls: number
-          name: string
-          price: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          features?: Json | null
-          id?: string
-          max_concurrent_calls?: number
-          name?: string
-          price?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["user_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["user_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: { role: Database["public"]["Enums"]["user_role"] }
-        Returns: boolean
-      }
-      user_has_role: {
-        Args: {
-          user_id: string
-          role: Database["public"]["Enums"]["user_role"]
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      user_role: "super_admin" | "client" | "campaign_manager" | "sales_agent"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -261,8 +133,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      user_role: ["super_admin", "client", "campaign_manager", "sales_agent"],
-    },
+    Enums: {},
   },
 } as const
